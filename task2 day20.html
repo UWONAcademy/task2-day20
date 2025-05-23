@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task 2 - Day 20</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to bottom right, #5cb1a6, #6dc1b5);
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 860px;
+      margin: 40px auto;
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    }
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .section-title {
+      font-size: 20px;
+      margin-top: 30px;
+      margin-bottom: 12px;
+      color: #34495e;
+      border-bottom: 2px solid #4caf91;
+      padding-bottom: 4px;
+    }
+    .question {
+      margin-bottom: 25px;
+    }
+    .english {
+      font-size: 16px;
+      margin-bottom: 6px;
+      line-height: 1.6;
+    }
+    .translation {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 6px;
+    }
+    input[type="text"] {
+      width: 140px;
+      padding: 6px;
+      margin: 0 3px;
+      font-size: 15px;
+      border: 2px solid #ccc;
+      border-radius: 6px;
+    }
+    .check-btn {
+      margin-top: 6px;
+      background: #4caf91;
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .feedback {
+      margin-top: 6px;
+      font-weight: bold;
+    }
+    .correct { color: green; }
+    .incorrect { color: red; }
+    @media (max-width: 600px) {
+      input[type="text"] {
+        width: 100px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Task 2 - Day 20</h2>
+
+  <div class="section-title">一. 句子填空（Fame）</div>
+
+  <div id="q1" class="question"></div>
+  <div id="q2" class="question"></div>
+  <div id="q3" class="question"></div>
+  <div id="q4" class="question"></div>
+</div>
+
+<script>
+  const sentences = [
+    {
+      id: "s1",
+      text: "One of the possible negative consequences of the “cult of celebrity” is the tendency to confuse fame and notoriety. Celebrity scandals are just as likely to receive publicity as celebrity achievements.",
+      translation: "明星崇拜可能带来负面影响，比如混淆美名与恶名，明星丑闻和成就一样被曝光。",
+      containerId: "q1"
+    },
+    {
+      id: "s2",
+      text: "Next to the superficial excitement of celebrity gossip, news about serious events and issues that have a more profound effect on people’s lives may seem uninteresting.",
+      translation: "相比明星八卦的表面刺激，真正影响生活的严肃新闻反而显得无趣。",
+      containerId: "q2"
+    },
+    {
+      id: "s3",
+      text: "The prevalence of celebrities in the mass media may convey the impression that such positions are plentiful. These days, young people are much more likely to see themselves as potential sports stars or entertainers.",
+      translation: "明星在媒体的泛滥让人误以为成名容易，越来越多年轻人幻想成为明星。",
+      containerId: "q3"
+    },
+    {
+      id: "s4",
+      text: "Ninety-nine percent of failures come from people who have the habit of making excuses.",
+      translation: "99% 的失败来自喜欢找借口的人。",
+      containerId: "q4"
+    }
+  ];
+
+  function getRandomIndexes(array, min = 5, max = 7) {
+    const count = Math.min(Math.floor(Math.random() * (max - min + 1)) + min, array.length);
+    const set = new Set();
+    while (set.size < count) {
+      const i = Math.floor(Math.random() * array.length);
+      const word = array[i].replace(/[.,()"]/g, '');
+      if (word.length > 2 && !word.includes("'")) set.add(i);
+    }
+    return Array.from(set);
+  }
+
+  function renderSentence({ id, text, translation, containerId }) {
+    const words = text.split(" ");
+    const blanks = getRandomIndexes(words);
+    const answers = {};
+    const html = words.map((word, i) => {
+      const clean = word.replace(/[.,()"]/g, "");
+      const punct = word.match(/[.,()"]$/) ? word.slice(-1) : "";
+      if (blanks.includes(i)) {
+        const inputId = `${id}_${i}`;
+        answers[inputId] = clean.toLowerCase();
+        return `<input type="text" id="${inputId}" placeholder="...">${punct}`;
+      }
+      return word;
+    }).join(" ");
+    document.getElementById(containerId).innerHTML = `
+      <div class="english">${html}</div>
+      <div class="translation">${translation}</div>
+      <button class="check-btn" onclick='checkSentence("${id}", ${JSON.stringify(answers)})'>Check</button>
+      <div class="feedback" id="fb_${id}"></div>
+    `;
+  }
+
+  function checkSentence(id, answers) {
+    const feedback = document.getElementById("fb_" + id);
+    let correct = true;
+    for (const [inputId, expected] of Object.entries(answers)) {
+      const val = document.getElementById(inputId).value.trim().toLowerCase();
+      if (val !== expected) correct = false;
+    }
+    feedback.innerHTML = correct
+      ? "<span class='correct'>✔ 正确！</span>"
+      : `<span class='incorrect'>✘ 有错误</span> 正确答案：${Object.values(answers).join(" / ")}`;
+  }
+
+  // 初始化所有句子填空
+  sentences.forEach(renderSentence);
+</script>
+</body>
+</html>
